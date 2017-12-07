@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace TestForTopShelfAndInstaller
 {
-    public class TestServer
+    public class TestService
     {
         private TcpListener tcpListener;
         private readonly System.Timers.Timer timer;
@@ -18,7 +18,7 @@ namespace TestForTopShelfAndInstaller
         public void Start() { timer.Start(); }
         public void Stop() { timer.Stop(); }
 
-        public TestServer()
+        public TestService()
         {
             tcpListener = new TcpListener(IPAddress.Any, 8210);
             tcpListener.Start();
