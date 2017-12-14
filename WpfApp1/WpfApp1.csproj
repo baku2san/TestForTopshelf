@@ -131,6 +131,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dll1\Dll1.vcxproj">
+      <Project>{9a14f547-bfe2-460a-9b42-4bc1f7e9ef04}</Project>
+      <Name>Dll1</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TestForTopShelfAndInstaller\TestForTopShelfAndInstaller.csproj">
       <Project>{257409ec-a8da-4c7c-be05-ac7531dd92e1}</Project>
       <Name>TestForTopShelfAndInstaller</Name>

@@ -18,3 +18,7 @@
 |Framework versionとVersion記述|https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/versions-and-dependencies|
 |元の情報|https://developercommunity.visualstudio.com/content/problem/10716/clickonce-can-not-find-462-prerequisite.html|
 
+
+
+VC++runtime の追加情報　VisualStudio2017InstallerProject
+https://blogs.msdn.microsoft.com/jpvsblog/2017/06/22/vs2017-vc14-installer/
