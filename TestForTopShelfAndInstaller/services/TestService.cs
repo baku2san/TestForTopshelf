@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Serilog;
 
 namespace TestForTopShelfAndInstaller
 {
@@ -22,6 +23,7 @@ namespace TestForTopShelfAndInstaller
         {
             tcpListener = new TcpListener(IPAddress.Any, 8210);
             tcpListener.Start();
+            Log.Information("start!");
 
             timer = new System.Timers.Timer(1000)
             {

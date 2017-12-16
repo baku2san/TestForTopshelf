@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,13 @@ namespace TestForTopShelfAndInstaller
     {
         static void Main(string[] args)
         {
+            // https://github.com/serilog/serilog/wiki/AppSettings
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.AppSettings()
+                .CreateLogger();
+
+            Log.Information("begin!");
+
             HostFactory.Run(x =>
             {
                 x.Service<TestService>(s =>
@@ -37,7 +45,10 @@ namespace TestForTopShelfAndInstaller
                 x.SetDisplayName("TopShelfSample");
                 x.SetServiceName("TopShelfSample_Service");
                 x.StartAutomaticallyDelayed();
+                Log.Information("run!");
+
             });
+            Log.CloseAndFlush();
         }
     }
 }
