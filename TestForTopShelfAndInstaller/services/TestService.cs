@@ -11,9 +11,9 @@ using Serilog;
 using System.Data.SqlClient;
 using System.Transactions;
 using System.Data;
-using JMLoggerApp.Producers;
-using static JMLoggerApp.Producers.MemoryInfo;
 using System.Configuration;
+using TestForTopShelfAndInstaller.Services;
+using static TestForTopShelfAndInstaller.Services.MemoryInfo;
 
 namespace TestForTopShelfAndInstaller
 {
@@ -73,10 +73,11 @@ namespace TestForTopShelfAndInstaller
                 new MemoryInfo("ColumnB", 0, AccessSizes.BIT),
                 new MemoryInfo("ColumnC", 0, AccessSizes.BIT),
             };
-            var tableName = "TableB";
+            var tableName = "TableAs";
 
             var sqlCommand = GetSqlCommandAsInsert(tableName, "Line1", infos);
             sqlCommand = GetSqlCommandAsUpdate(tableName, "Line1", infos);
+            sqlCommand = GetSqlCommandAsUpdateOrInsert(tableName, "Line10", infos);
             var valueList = new MemoryValueList("testList", sqlCommand);
             valueList.MemoryValuesGroups.Add(infos.Select(s => new MemoryValue(s, true)).ToList());
             InsertData(valueList);
@@ -103,6 +104,46 @@ namespace TestForTopShelfAndInstaller
                         command.Parameters.Add(info.Name, SqlDbType.Binary, 2);
                         break;
                     case AccessSizes.DWORD:
+                    default:
+                        command.Parameters.Add(info.Name, SqlDbType.Binary, 4);
+                        break;
+                }
+            }
+            var sqlCommand = new SqlCommand(commandText.ToString());
+            infos.ToList().ForEach(f => AddParameters(f, sqlCommand));
+            sqlCommand.Parameters.Add("LineName", SqlDbType.NVarChar);
+            sqlCommand.Parameters["LineName"].Value = lineName;
+            sqlCommand.Parameters.Add("Created", SqlDbType.DateTime2);
+
+            return sqlCommand;
+        }
+        static public SqlCommand GetSqlCommandAsUpdateOrInsert(string tableName, string lineName, IEnumerable<MemoryInfo> infos)
+        {
+            // 現状 source は不要だけど、Merge には USING 必須っぽいので、付けてるだけ as も要らんけど
+            var commandText = new StringBuilder("MERGE TOP(1) ").Append(tableName).Append(" as target USING ").Append(tableName).Append(" as source");
+            commandText.Append(" ON (target.LineName='").Append(lineName).Append("')");
+            commandText.Append(" WHEN MATCHED THEN");
+
+            infos.Aggregate(commandText.Append(" UPDATE SET "), (a, b) => a.Append(b.Name).Append("=@").Append(b.Name).Append(","), (a) => a.Append("Created=@Created "));
+
+            commandText.Append(" WHEN NOT MATCHED BY target THEN");
+
+            infos.Aggregate(commandText.Append(" INSERT ("), (a, b) => a.Append(b.Name).Append(","), (a) => a.Append("LineName, Created)"));
+            infos.Aggregate(commandText.Append(" Values ("), (a, b) => a.Append("@").Append(b.Name).Append(","), (a) => a.Append("@LineName,@Created);"));
+
+            void AddParameters(MemoryInfo info, SqlCommand command)
+            {
+                switch (info.AccessSize)
+                {
+                    case AccessSizes.BIT:
+                        command.Parameters.Add(info.Name, SqlDbType.Bit);
+                        break;
+                    case AccessSizes.BYTE:
+                        command.Parameters.Add(info.Name, SqlDbType.Binary, 1);
+                        break;
+                    case AccessSizes.WORD:
+                        command.Parameters.Add(info.Name, SqlDbType.Binary, 2);
+                        break;
                     default:
                         command.Parameters.Add(info.Name, SqlDbType.Binary, 4);
                         break;
